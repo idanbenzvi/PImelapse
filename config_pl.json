@@ -1,6 +1,6 @@
 {
   "Version": "1.0",
-  "caputresSettings": {
+  "capturesSettings": {
     "lightHoursOnly": "true",
     "frames": "1440",
     "waitTime": "60",

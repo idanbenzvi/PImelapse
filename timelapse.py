@@ -1,11 +1,19 @@
-from picamera import PiCamera
-import subprocess
-import datetime
-from termcolor import colored
-from astral import *
-from datetime import date,datetime
+from picamera import PiCamera #camera interface API
+import subprocess # call outside shell commands
+import datetime #to get current time and date
+import argparse #handle command line interface
+from termcolor import colored #set colored text
+from astral import * # get sun times according to date
+import json # JSON file support
+
 
 #RIGHT NOW THIS IS SIMPLY A PYTHON SCRIPT - LATER ON - CONVERT TO CLASS!
+
+#setup command line argument parsing
+parser = argparse.ArgumentParser(description='Settings identification')
+parser.add_argument("manualSetBool",action="store_true",required=False,help='To get settings from the user or automatically from config file.')
+args = parser.parse_args()
+
 
 #create camera object instance
 print colored(" ____ ___                _                          __     ___   ___",'yellow')
@@ -36,11 +44,23 @@ def getSettings():
 	lengthShots = int(input("How long would you like to continously take shots? (negative values will mean you will have to manually shut down \n"))
 	return freq,timeStamp,lengthShots;
 
-#get user settings (add file settings loading later on)
-a = raw_input("Would you like to type in your settings or use the config.txt file? press Y / N for config file")
+def loadJSONsettings():
+	configFile = open('config_pl.json')
+	configDict = json.load(configFile)
+	configFile.close()
+	return configDict;
 
-#if(a == "Y"):
-#	getSettings();
+
+#get user settings (add file settings loading later on)
+#to get user settings the user must add a flag to the command line instruction (the usage of input is annoying)
+#a = raw_input("Would you like to type in your settings or use the config.txt file? press Y / N for config file")
+
+if args.manualSetBool:
+	settings = getSettings()
+else:
+	print('using automated settings...\n')
+	settings = loadJSONsettings()
+
 
 def getTimes():
 	astralObj = Astral()
