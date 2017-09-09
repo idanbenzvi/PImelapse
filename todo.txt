@@ -1,0 +1,5 @@
+1. set up the phototimer python script
+2. set configuration file for phototimer
+3. set an upload command once every file has been shot
+4. delete the file from the tmpfs - RAM FS
+5. Wrap everything inside a Docker and then be able to deploy it again and again

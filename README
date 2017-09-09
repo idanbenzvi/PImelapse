@@ -1,0 +1,5 @@
+PImeLapse V1.-0
+---------------
+todos are in the todo file
+timelapse.py - the script itself, to be converted to a class / package
+currently config_tl contains a JSON format that is converted to timelapse settings
