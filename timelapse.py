@@ -1,6 +1,6 @@
 from picamera import PiCamera #camera interface API
 import subprocess # call outside shell commands
-import datetime #to get current time and date
+from datetime import datetime,time,date #to get current time and date
 import argparse #handle command line interface
 from termcolor import colored #set colored text
 from astral import * # get sun times according to date
@@ -10,8 +10,8 @@ import json # JSON file support
 #RIGHT NOW THIS IS SIMPLY A PYTHON SCRIPT - LATER ON - CONVERT TO CLASS!
 
 #setup command line argument parsing
-parser = argparse.ArgumentParser(description='Settings identification')
-parser.add_argument("manualSetBool",action="store_true",required=False,help='To get settings from the user or automatically from config file.')
+parser = argparse.ArgumentParser(description='Get user response for timelapse settings')
+parser.add_argument("--set",action="store_true",required=False,help='To get settings from the user or automatically from config file.')
 args = parser.parse_args()
 
 
@@ -55,12 +55,11 @@ def loadJSONsettings():
 #to get user settings the user must add a flag to the command line instruction (the usage of input is annoying)
 #a = raw_input("Would you like to type in your settings or use the config.txt file? press Y / N for config file")
 
-if args.manualSetBool:
+if args.set:
 	settings = getSettings()
 else:
 	print('using automated settings...\n')
 	settings = loadJSONsettings()
-
 
 def getTimes():
 	astralObj = Astral()
@@ -83,6 +82,7 @@ def getTimes():
 print colored("Commencing Timelapse, Please make sure the camera is well positioned...",'cyan')
 
 #set up camera object instance
+print(settings)
 camera = PiCamera(resolution=(2592,1944))
 
 def wait():
@@ -102,13 +102,13 @@ def isValidTime(sun):
 		return False
 
 
-def capture():
+def capture(settings):
 	sun = getTimes()
 	#location = a['jerusalem']
 	#sun = location.sun(local=True, date=datetime.today())
 	i = 1
 	while(isValidTime(sun)):
-		filename = camera.capture('/tmp/img' + str(i) + '.jpg',format='jpeg',quality=100)
+		filename = camera.capture('/tmp/img' + str(i) + '.jpg',format='jpeg',quality=int(settings["imageSettings"]["quality"]))
 		#Should we capture now ?
 		if(isValidTime(sun)):
 			print('Captured %s' % filename)
@@ -120,4 +120,4 @@ def capture():
 
 #### ACTUAL TIME LAPSE ####
 
-capture()
+capture(settings)
