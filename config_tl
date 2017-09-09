@@ -1,0 +1,23 @@
+//PimeLapse configuration File v1.0
+//http://objgen.com/json/models/XGe
+{
+  "Version": "1.0",
+  "caputresSettings": {
+    "lightHoursOnly": "true",
+    "frames": "1440",
+    "waitTime": "60",
+    "RAMTemp": "true //set up default temp on RAM",
+    "savetoGdrive": "true"
+  },
+  "imageSettings": {
+    "resolution": [
+      "2950",
+      "1944"
+    ],
+    "quality": "100"
+  },
+  "notificationSettings": {
+    "sendError": "true",
+    "sendComplete": "true"
+  }
+}
