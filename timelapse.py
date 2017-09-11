@@ -5,13 +5,18 @@ import argparse #handle command line interface
 from termcolor import colored #set colored text
 from astral import * # get sun times according to date
 import json # JSON file support
+from time import sleep
 
-
+#Google drive module for authentication
+#from pydrive.auth import GoogleAuth
+#gauth = GoogleAuth()
+#gauth.LocalWebserverAuth()
 #RIGHT NOW THIS IS SIMPLY A PYTHON SCRIPT - LATER ON - CONVERT TO CLASS!
 
 #setup command line argument parsing
 parser = argparse.ArgumentParser(description='Get user response for timelapse settings')
 parser.add_argument("--set",action="store_true",required=False,help='To get settings from the user or automatically from config file.')
+parser.add_argument("--capture",action="store_true",required=False,help='To force capture')
 args = parser.parse_args()
 
 
@@ -32,7 +37,7 @@ print colored("Running TimeLapse script according to parameters given, photos wi
 print colored("If network connection fails, the photos will be backed-up offline until connection restore",'white')
 print colored("Once restored - files will be synced and then deleted again",'white')
 print colored("------------------------------------------------------------------------------------------",'cyan')
-print colored("Next version will use PyDrive instead of subproecss calling gdrive",'red')
+#print colored("Next version will use PyDrive instead of subproecss calling gdrive",'red')
 
 
 #get current dawn and sunset times from Astral
@@ -50,10 +55,9 @@ def loadJSONsettings():
 	configFile.close()
 	return configDict;
 
-
+#
 #get user settings (add file settings loading later on)
-#to get user settings the user must add a flag to the command line instruction (the usage of input is annoying)
-#a = raw_input("Would you like to type in your settings or use the config.txt file? press Y / N for config file")
+#
 
 if args.set:
 	settings = getSettings()
@@ -66,30 +70,16 @@ def getTimes():
 	location = astralObj['Jerusalem']
 	d = datetime.today()
 
-	#print('Information for %s' % location.name)
-	#        Information for London
-	#timezone = location.timezone
-	#print('Timezone: %s' % timezone)
-	#        Timezone: Europe/London
 	sun = location.sun(local=True, date=d)
-	#print('Dawn:    %s' % str(sun['dawn']))
-	#       Dawn:    2009-04-22 05:12:56+01:00
-	#sunset = location.sunset(local=True,date=d)
-	#print('Sunset:	%s' % str(sun['sunset']))
-
 	return sun;
 
 print colored("Commencing Timelapse, Please make sure the camera is well positioned...",'cyan')
 
 #set up camera object instance
-print(settings)
-camera = PiCamera(resolution=(2592,1944))
 
 def wait():
-# Calculate the delay to the start of the next hour
-	next_hour = (datetime.now() + timedelta(hour=1)).replace(
-	minute=0, second=0, microsecond=0)
-	delay = (next_hour - datetime.now()).seconds
+	print('Waiting for 10 seconds')
+	delay = 10
 	sleep(delay)
 	return;
 
@@ -104,20 +94,21 @@ def isValidTime(sun):
 
 def capture(settings):
 	sun = getTimes()
-	#location = a['jerusalem']
-	#sun = location.sun(local=True, date=datetime.today())
 	i = 1
-	while(isValidTime(sun)):
+	
+	while(isValidTime(sun) or args.capture):
 		filename = camera.capture('/tmp/img' + str(i) + '.jpg',format='jpeg',quality=int(settings["imageSettings"]["quality"]))
 		#Should we capture now ?
-		if(isValidTime(sun)):
+		if(isValidTime(sun) or args.capture):
 			print('Captured %s' % filename)
 			i+=1
 			subprocess.call('./gdrive-linux-rpi sync upload /tmp/ 0BxITvHmu2Y4FMEtpSFRER05rbHc',shell=True)
 			subprocess.call('rm /tmp/*.jpg', shell=True)
+			wait()
 		else:
 			wait() #calculate how long we should wait until starting the process over, if time exceeds the required TL time - exit
 
-#### ACTUAL TIME LAPSE ####
 
+#### ACTUAL TIME LAPSE ####
+camera = PiCamera(resolution=(2592,1944))
 capture(settings)
